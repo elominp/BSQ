@@ -1,0 +1,13 @@
+./tests/plateaux_valides/plateau1
+./tests/plateaux_valides/plateau2
+./tests/plateaux_valides/plateau3
+./tests/plateaux_valides/plateau4
+./tests/plateaux_valides/plateau5
+./tests/plateaux_valides/plateau6
+./tests/plateaux_valides/plateau7
+./tests/plateaux_valides/rect2
+./tests/plateaux_faux/plateau1
+./tests/plateaux_faux/plateau2
+./tests/plateaux_faux/plateau3
+./tests/plateaux_faux/plateau4
+./tests/plateaux_faux/plateau5

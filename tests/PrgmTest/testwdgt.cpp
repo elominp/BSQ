@@ -1,0 +1,131 @@
+//
+// testwdgt.cpp for bsq in /
+// 
+// Made by guigui
+// Login   <guigui@epitech.net>
+// 
+// Started on  Sun Jan 18 22:34:55 2015 guigui
+// Last update Sun Jan 18 22:34:57 2015 guigui
+//
+
+#include "testwdgt.h"
+#include "ui_testwdgt.h"
+
+using namespace std;
+
+TestWdgt::TestWdgt(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::TestWdgt)
+{
+    ui->setupUi(this);
+    app_path = "";
+    in_path = "";
+    out_path = "";
+
+    QObject::connect(ui->bt_app, SIGNAL(clicked()), this, SLOT(click_app()));
+    QObject::connect(ui->bt_input, SIGNAL(clicked()), this, SLOT(click_in()));
+    QObject::connect(ui->bt_output, SIGNAL(clicked()), this, SLOT(click_out()));
+    QObject::connect(ui->bt_run, SIGNAL(clicked()), this, SLOT(click_run()));
+}
+
+void TestWdgt::click_app()
+{
+    app_path = QFileDialog::getOpenFileName(this, "Open app path", "./");
+}
+
+void TestWdgt::click_in()
+{
+    in_path = QFileDialog::getOpenFileName(this, "Open input file", "./");
+    in_file.open(in_path.toStdString().c_str(), ios::in);
+}
+
+void TestWdgt::click_out()
+{
+    out_path = QFileDialog::getOpenFileName(this, "Open diff test file", "./");
+    out_file.open(out_path.toStdString().c_str(), ios::in);
+}
+
+bool TestWdgt::check_app()
+{
+    if (app_path == "")
+        return (false);
+    return (true);
+}
+
+bool TestWdgt::check_in()
+{
+    if (in_path == "" || in_file.is_open() == false || in_file.fail())
+        return (false);
+    return (true);
+}
+
+bool TestWdgt::check_out()
+{
+    if (out_path == "" || out_file.is_open() == false || out_file.fail())
+        return (false);
+    return (true);
+}
+
+bool TestWdgt::check()
+{
+    if (check_app() == false)
+    {
+        QMessageBox::critical(this, "Error", "No application chosen");
+        return (false);
+    }
+    else if (check_in() == false)
+    {
+        QMessageBox::critical(this, "Error", "No input file chosen or imposible to open it");
+        return (false);
+    }
+    else if (check_out() == false)
+    {
+        QMessageBox::critical(this, "Error", "No output test file chosen or imposible to open it");
+        return (false);
+    }
+    return (true);
+}
+
+void TestWdgt::click_run()
+{
+    int    err;
+    string in;
+    string out;
+    string cmd;
+    ifstream log;
+
+    if (check() == false)
+        return;
+    ui->log->clear();
+    err = 0;
+    while (!in_file.eof() && !out_file.fail() && !out_file.eof() && !out_file.fail())
+    {
+        getline(in_file, in);
+        getline(out_file, out);
+        cmd = "/" + app_path.toStdString() + ' ' + in + " > " + in + "-out" + " 2>&1";
+        system(cmd.c_str());
+        cmd = "diff " + out + ' ' + in + "-out > " + in + "-log";
+        system(cmd.c_str());
+        cmd = in + "-log";
+        log.open(cmd.c_str(), ios::in);
+        getline(log, cmd);
+        if (!log.eof() || !log.fail())
+        {
+            ui->log->appendPlainText(QString("KO : " + QString(in.c_str())));
+            ++err;
+        }
+        else
+            ui->log->appendPlainText(QString("OK"));
+        log.close();
+    }
+    QMessageBox::information(this, "Result", QString(QString::number(err) + " tests failed"));
+    in_file.close();
+    out_file.close();
+}
+
+TestWdgt::~TestWdgt()
+{
+    in_file.close();
+    out_file.close();
+    delete ui;
+}
